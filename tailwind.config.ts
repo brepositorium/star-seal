@@ -15,6 +15,9 @@ const config: Config = {
       large: "28px",
     },
     extend: {
+      fontFamily: {
+        poppins: ["poppins", "sans-serif"],
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":
