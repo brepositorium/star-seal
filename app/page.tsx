@@ -1,5 +1,6 @@
 "use client";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import { ethers } from "ethers";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useAccount } from "wagmi";
@@ -8,6 +9,24 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("sign");
   const [isConnected, setIsConnected] = useState(false);
   const { isConnected: wagmiIsConnected } = useAccount();
+
+  const [nftAddress, setNftAddress] = useState("");
+  const [tokenId, setTokenId] = useState("");
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const validateInputs = () => {
+    if (!ethers.isAddress(nftAddress)) {
+      setError("Invalid NFT Address");
+      return false;
+    }
+    if (isNaN(parseInt(tokenId)) || parseInt(tokenId) < 0) {
+      setError("Token ID must be a positive number");
+      return false;
+    }
+    setError("");
+    return true;
+  };
 
   useEffect(() => {
     setIsConnected(wagmiIsConnected);
@@ -22,6 +41,10 @@ export default function Home() {
     // Implement check functionality here
     console.log("Checking NFT signature...");
   };
+
+  {
+    error && <p className="text-red-500 mb-4">{error}</p>;
+  }
 
   return (
     <>
@@ -87,6 +110,8 @@ export default function Home() {
                   type="text"
                   id="nft-address"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-black"
+                  value={nftAddress}
+                  onChange={(e) => setNftAddress(e.target.value)}
                 />
               </div>
               <div className="mb-4">
@@ -100,6 +125,8 @@ export default function Home() {
                   type="number"
                   id="token-id"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md text-black"
+                  value={tokenId}
+                  onChange={(e) => setTokenId(e.target.value)}
                 />
               </div>
               {activeTab === "sign" ? (
@@ -114,6 +141,8 @@ export default function Home() {
                     id="message"
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-black"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
                   ></textarea>
                 </div>
               ) : (
