@@ -1,14 +1,16 @@
 "use client";
+import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import { ethers } from "ethers";
+import { BrowserProvider, ethers } from "ethers";
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useCallback, useEffect, useState } from "react";
+import { useAccount, useWalletClient } from "wagmi";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("sign");
   const [isConnected, setIsConnected] = useState(false);
   const { isConnected: wagmiIsConnected } = useAccount();
+  const { data: walletClient } = useWalletClient();
 
   const [nftAddress, setNftAddress] = useState("");
   const [tokenId, setTokenId] = useState("");
@@ -32,10 +34,48 @@ export default function Home() {
     setIsConnected(wagmiIsConnected);
   }, [wagmiIsConnected]);
 
-  const handleSign = () => {
-    // Implement sign functionality here
-    console.log("Signing NFT...");
-  };
+  const easContractAddress = "0x4200000000000000000000000000000000000021";
+  const schemaUID =
+    "0xea0fa1ad2ffcc34874c5a338bdf898df6c112e9b56aa39d62456436e6751a070";
+
+  const handleSign = useCallback(async () => {
+    if (!validateInputs() || !walletClient) return;
+
+    try {
+      const eas = new EAS(easContractAddress);
+
+      const provider = new BrowserProvider(walletClient.transport);
+      const signer = await provider.getSigner();
+
+      await eas.connect(signer);
+
+      const schemaEncoder = new SchemaEncoder(
+        "address nftAddress,uint256 tokenId,string message"
+      );
+      const encodedData = schemaEncoder.encodeData([
+        { name: "nftAddress", value: nftAddress, type: "address" },
+        { name: "tokenId", value: tokenId, type: "uint256" },
+        { name: "message", value: message, type: "string" },
+      ]);
+
+      const tx = await eas.attest({
+        schema: schemaUID,
+        data: {
+          recipient: "0x0000000000000000000000000000000000000000",
+          expirationTime: BigInt(0),
+          revocable: false,
+          data: encodedData,
+        },
+      });
+
+      const newAttestationUID = await tx.wait();
+      console.log("New attestation UID:", newAttestationUID);
+      setError("Attestation created successfully!");
+    } catch (err) {
+      console.error(err);
+      setError("Failed to create attestation. Check console for details.");
+    }
+  }, [nftAddress, tokenId, message, walletClient]);
 
   const handleCheck = () => {
     // Implement check functionality here
