@@ -5,6 +5,16 @@ import { useState } from "react";
 export default function Home() {
   const [activeTab, setActiveTab] = useState("sign");
 
+  const handleSign = () => {
+    // Implement sign functionality here
+    console.log("Signing NFT...");
+  };
+
+  const handleCheck = () => {
+    // Implement check functionality here
+    console.log("Checking NFT signature...");
+  };
+
   return (
     <>
       <div className="bg-gradient-to-r from-blue-200 via-white to-yellow-100 flex flex-col items-center justify-center p-4">
@@ -27,7 +37,7 @@ export default function Home() {
             className={`px-4 py-2 text-md font-medium rounded-l-lg font-poppins w-28
             ${
               activeTab === "sign"
-                ? "bg-blue-500 text-white"
+                ? "bg-primary text-white"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
             }`}
             onClick={() => setActiveTab("sign")}
@@ -39,7 +49,7 @@ export default function Home() {
             className={`px-4 py-2 text-md font-medium rounded-r-lg font-poppins w-28
             ${
               activeTab === "check"
-                ? "bg-blue-500 text-white"
+                ? "bg-primary text-white"
                 : "bg-gray-200 text-gray-600 hover:bg-gray-300"
             }`}
             onClick={() => setActiveTab("check")}
@@ -78,10 +88,11 @@ export default function Home() {
           </div>
 
           <button
-            className="w-full font-medium shadow-md text-lg bg-yellow-500 text-white 
-          py-1 mb-2 rounded-md hover:bg-yellow-600 transition-colors font-poppins"
+            className="w-full font-medium shadow-md text-lg bg-secondary text-white
+            py-1 mb-2 rounded-md hover:bg-opacity-90 transition-colors font-poppins"
+            onClick={activeTab === "sign" ? handleSign : handleCheck}
           >
-            Sign
+            {activeTab === "sign" ? "Sign" : "Check"}
           </button>
         </div>
 
