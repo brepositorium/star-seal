@@ -15,6 +15,10 @@ const config: Config = {
       large: "28px",
     },
     extend: {
+      colors: {
+        primary: "#2880BB",
+        secondary: "#DCB44A",
+      },
       fontFamily: {
         poppins: ["poppins", "sans-serif"],
       },
