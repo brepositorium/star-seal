@@ -1,10 +1,40 @@
 "use client";
+import { gql, useQuery } from "@apollo/client";
 import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { BrowserProvider, ethers } from "ethers";
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
+
+const GET_NFT_ATTESTATIONS = gql`
+  query NFTAttestations(
+    $schemaId: String!
+    $nftAddress: String!
+    $attester: String!
+  ) {
+    attestations(
+      where: {
+        schemaId: { equals: $schemaId }
+        attester: { equals: $attester }
+        decodedDataJson: { contains: $nftAddress }
+      }
+      orderBy: { time: desc }
+    ) {
+      id
+      attester
+      recipient
+      time
+      decodedDataJson
+    }
+  }
+`;
+
+type CheckResult = {
+  found: boolean;
+  message?: string;
+  time?: string;
+};
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("sign");
@@ -15,6 +45,8 @@ export default function Home() {
   const [nftAddress, setNftAddress] = useState("");
   const [tokenId, setTokenId] = useState("");
   const [message, setMessage] = useState("");
+  const [signersAddress, setSignersAddress] = useState("");
+  const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
   const [error, setError] = useState("");
 
   const validateInputs = () => {
@@ -77,10 +109,66 @@ export default function Home() {
     }
   }, [nftAddress, tokenId, message, walletClient]);
 
-  const handleCheck = () => {
-    // Implement check functionality here
-    console.log("Checking NFT signature...");
-  };
+  const { refetch } = useQuery(GET_NFT_ATTESTATIONS, {
+    skip: true,
+    variables: {
+      schemaId: schemaUID,
+      nftAddress: "",
+      attester: "",
+    },
+  });
+
+  const handleCheck = useCallback(async () => {
+    try {
+      const { data } = await refetch({
+        schemaId: schemaUID,
+        nftAddress,
+        attester: signersAddress,
+      });
+      console.log(data);
+      if (data && data.attestations) {
+        const filteredAttestations = data.attestations.filter(
+          (attestation: any) => {
+            const decodedData = JSON.parse(attestation.decodedDataJson);
+            const nftAddressMatch = decodedData.some(
+              (field: any) =>
+                field.name === "nftAddress" && field.value.value === nftAddress
+            );
+            const tokenIdMatch = decodedData.some((field: any) => {
+              if (field.name !== "tokenId") return false;
+              const attestationTokenId = BigInt(
+                field.value.value.hex
+              ).toString();
+              return attestationTokenId === tokenId;
+            });
+
+            return nftAddressMatch && tokenIdMatch;
+          }
+        );
+
+        if (filteredAttestations.length > 0) {
+          const attestation = filteredAttestations[0];
+          const decodedData = JSON.parse(attestation.decodedDataJson);
+          const message = decodedData.find(
+            (field: any) => field.name === "message"
+          ).value.value;
+          setCheckResult({
+            found: true,
+            message: message,
+            time: new Date(attestation.time * 1000).toLocaleString(),
+          });
+          console.log(checkResult);
+        } else {
+          setCheckResult({ found: false });
+        }
+      } else {
+        setCheckResult({ found: false });
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to check attestation. Check console for details.");
+    }
+  }, [nftAddress, tokenId, signersAddress, refetch]);
 
   {
     error && <p className="text-red-500 mb-4">{error}</p>;
@@ -197,6 +285,8 @@ export default function Home() {
                     type="text"
                     id="signers-address"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-black"
+                    value={signersAddress}
+                    onChange={(e) => setSignersAddress(e.target.value)}
                   />
                 </div>
               )}
@@ -209,6 +299,22 @@ export default function Home() {
               >
                 {activeTab === "sign" ? "Sign" : "Check"}
               </button>
+
+              {checkResult && (
+                <div className="mt-4">
+                  {checkResult.found ? (
+                    <>
+                      <p className="text-green-600">Attestation found!</p>
+                      <p>Message: {checkResult.message}</p>
+                      <p>Time: {checkResult.time}</p>
+                    </>
+                  ) : (
+                    <p className="text-red-600">
+                      No attestation found for this NFT and signer.
+                    </p>
+                  )}
+                </div>
+              )}
             </div>
           </>
         ) : (
