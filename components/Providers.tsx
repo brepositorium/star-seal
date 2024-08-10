@@ -9,6 +9,8 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { base, mainnet, sepolia } from "viem/chains";
 import "@rainbow-me/rainbowkit/styles.css";
+import { ApolloProvider } from "@apollo/client";
+import client from "../lib/apolloClient";
 
 const queryClient = new QueryClient();
 
@@ -25,16 +27,18 @@ const config = getDefaultConfig({
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <WagmiProvider config={config}>
-      <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider
-          theme={lightTheme({
-            accentColor: "#2880BB",
-          })}
-        >
-          {children}
-        </RainbowKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <ApolloProvider client={client}>
+      <WagmiProvider config={config}>
+        <QueryClientProvider client={queryClient}>
+          <RainbowKitProvider
+            theme={lightTheme({
+              accentColor: "#2880BB",
+            })}
+          >
+            {children}
+          </RainbowKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </ApolloProvider>
   );
 }
