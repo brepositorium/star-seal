@@ -5,6 +5,7 @@ import { Chain, OpenSeaSDK } from "opensea-js";
 import { validateInputs } from "../utils/validation";
 import NFTForm from "./NFTForm";
 import CheckResult from "./CheckResult";
+import toast from "react-hot-toast";
 
 const GET_NFT_ATTESTATIONS = gql`
   query NFTAttestations(
@@ -68,11 +69,13 @@ export default function CheckTab() {
     if (!validateInputs(nftAddress, tokenId, setError)) return;
 
     try {
+      toast.loading("Checking attestation...");
       const { data } = await refetch({
         schemaId: schemaUID,
         nftAddress,
         attester: signersAddress,
       });
+      console.log(data);
       if (data && data.attestations) {
         const filteredAttestations = data.attestations.filter(
           (attestation: Attestation) => {
@@ -120,14 +123,22 @@ export default function CheckTab() {
             nftImage: asset.nft.image_url,
             nftName: asset.nft.name,
           });
+          toast.dismiss();
+          toast.success("Attestation found!");
         } else {
           setCheckResult({ found: false });
+          toast.dismiss();
+          toast.error("No attestation found for this NFT and signer.");
         }
       } else {
         setCheckResult({ found: false });
+        toast.dismiss();
+        toast.error("No attestation found for this NFT and signer.");
       }
     } catch (err) {
       console.error(err);
+      toast.dismiss();
+      toast.error("Failed to check attestation. Check console for details.");
       setError("Failed to check attestation. Check console for details.");
     }
   }, [nftAddress, tokenId, signersAddress, refetch]);

@@ -4,12 +4,14 @@ import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { BrowserProvider } from "ethers";
 import { validateInputs } from "../utils/validation";
 import NFTForm from "./NFTForm";
+import toast from "react-hot-toast";
 
 export default function SignTab() {
   const [nftAddress, setNftAddress] = useState<string>("");
   const [tokenId, setTokenId] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [isSigning, setIsSigning] = useState<boolean>(false);
   const { data: walletClient } = useWalletClient();
 
   const easContractAddress = "0x4200000000000000000000000000000000000021";
@@ -20,13 +22,11 @@ export default function SignTab() {
     if (!validateInputs(nftAddress, tokenId, setError) || !walletClient) return;
 
     try {
+      toast.loading("Creating attestation...");
       const eas = new EAS(easContractAddress);
-
       const provider = new BrowserProvider(walletClient.transport);
       const signer = await provider.getSigner();
-
       await eas.connect(signer);
-
       const schemaEncoder = new SchemaEncoder(
         "address nftAddress,uint256 tokenId,string message"
       );
@@ -35,7 +35,6 @@ export default function SignTab() {
         { name: "tokenId", value: tokenId, type: "uint256" },
         { name: "message", value: message, type: "string" },
       ]);
-
       const tx = await eas.attest({
         schema: schemaUID,
         data: {
@@ -45,12 +44,18 @@ export default function SignTab() {
           data: encodedData,
         },
       });
-
       const newAttestationUID = await tx.wait();
       console.log("New attestation UID:", newAttestationUID);
-      setError("Attestation created successfully!");
+      toast.dismiss();
+      toast.success("Attestation created successfully!");
+      setError("");
+      setNftAddress("");
+      setTokenId("");
+      setMessage("");
     } catch (err) {
       console.error(err);
+      toast.dismiss();
+      toast.error("Failed to create attestation. Check console for details.");
       setError("Failed to create attestation. Check console for details.");
     }
   }, [nftAddress, tokenId, message, walletClient]);
