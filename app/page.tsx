@@ -4,6 +4,7 @@ import { EAS, SchemaEncoder } from "@ethereum-attestation-service/eas-sdk";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { BrowserProvider, ethers } from "ethers";
 import Image from "next/image";
+import { Chain, OpenSeaSDK } from "opensea-js";
 import { useCallback, useEffect, useState } from "react";
 import { useAccount, useWalletClient } from "wagmi";
 
@@ -34,6 +35,8 @@ type CheckResult = {
   found: boolean;
   message?: string;
   time?: string;
+  nftImage?: string;
+  nftName?: string;
 };
 
 export default function Home() {
@@ -125,7 +128,6 @@ export default function Home() {
         nftAddress,
         attester: signersAddress,
       });
-      console.log(data);
       if (data && data.attestations) {
         const filteredAttestations = data.attestations.filter(
           (attestation: any) => {
@@ -152,12 +154,26 @@ export default function Home() {
           const message = decodedData.find(
             (field: any) => field.name === "message"
           ).value.value;
+          const provider = new ethers.JsonRpcProvider(
+            "https://mainnet.base.org"
+          );
+          const openseaSDK = new OpenSeaSDK(provider, {
+            chain: Chain.Base,
+            apiKey: "913dbf5f6097430fa790e0aec86702d6",
+          });
+          const asset = await openseaSDK.api.getNFT(
+            nftAddress,
+            tokenId,
+            Chain.Base
+          );
+          console.log(asset.nft.image_url);
           setCheckResult({
             found: true,
             message: message,
             time: new Date(attestation.time * 1000).toLocaleString(),
+            nftImage: asset.nft.image_url,
+            nftName: asset.nft.name,
           });
-          console.log(checkResult);
         } else {
           setCheckResult({ found: false });
         }
@@ -304,9 +320,29 @@ export default function Home() {
                 <div className="mt-4">
                   {checkResult.found ? (
                     <>
-                      <p className="text-green-600">Attestation found!</p>
-                      <p>Message: {checkResult.message}</p>
-                      <p>Time: {checkResult.time}</p>
+                      <p className="text-green-600 text-center mb-2 font-poppins">
+                        The NFT was signed!
+                      </p>
+                      <div className="bg-white rounded-large shadow-md w-full max-w-sm">
+                        {checkResult.nftImage && (
+                          <img
+                            className="rounded-xl mb-2"
+                            src={checkResult.nftImage}
+                            alt={checkResult.nftName || "NFT"}
+                          />
+                        )}
+                        {checkResult.nftName && (
+                          <p className="text-black text-center font-poppins mb-2">
+                            {checkResult.nftName}
+                          </p>
+                        )}
+                        <p className="text-black text-center font-pacifico py-2 text-xl">
+                          {checkResult.message}
+                        </p>
+                        <p className="text-black font-poppins text-right mr-6 py-4">
+                          🖊️{checkResult.time}
+                        </p>
+                      </div>
                     </>
                   ) : (
                     <p className="text-red-600">
