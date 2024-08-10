@@ -21,6 +21,7 @@ const config: Config = {
       },
       fontFamily: {
         poppins: ["poppins", "sans-serif"],
+        pacifico: ["pacifico", "sans-serif"],
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
