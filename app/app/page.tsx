@@ -5,6 +5,7 @@ import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Image from "next/image";
 import SignTab from "../../components/SignTab";
 import CheckTab from "../../components/CheckTab";
+import Link from "next/link";
 
 export default function AppPage() {
   const [activeTab, setActiveTab] = useState<"sign" | "check">("sign");
@@ -24,13 +25,15 @@ export default function AppPage() {
       )}
 
       <div>
-        <Image
-          className="mx-auto mb-8 -mt-8"
-          src="/logo.png"
-          width={200}
-          height={200}
-          alt="StarSeal Logo"
-        />
+        <Link href="/">
+          <Image
+            className="mx-auto mb-8 -mt-8"
+            src="/logo.png"
+            width={200}
+            height={200}
+            alt="StarSeal Logo"
+          />
+        </Link>
       </div>
 
       {isConnected ? (
