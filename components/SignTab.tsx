@@ -11,12 +11,10 @@ export default function SignTab() {
   const [tokenId, setTokenId] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [error, setError] = useState<string>("");
-  const [isSigning, setIsSigning] = useState<boolean>(false);
   const { data: walletClient } = useWalletClient();
 
-  const easContractAddress = "0x4200000000000000000000000000000000000021";
-  const schemaUID =
-    "0xea0fa1ad2ffcc34874c5a338bdf898df6c112e9b56aa39d62456436e6751a070";
+  const easContractAddress = process.env.NEXT_PUBLIC_EAS_CONTRACT!;
+  const schemaUID = process.env.NEXT_PUBLIC_SCHEMA_UID!;
 
   const handleSign = useCallback(async () => {
     if (!validateInputs(nftAddress, tokenId, setError) || !walletClient) return;

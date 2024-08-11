@@ -53,8 +53,7 @@ export default function CheckTab() {
   const [checkResult, setCheckResult] = useState<CheckResult | null>(null);
   const [error, setError] = useState<string>("");
 
-  const schemaUID =
-    "0xea0fa1ad2ffcc34874c5a338bdf898df6c112e9b56aa39d62456436e6751a070";
+  const schemaUID = process.env.NEXT_PUBLIC_SCHEMA_UID;
 
   const { refetch } = useQuery(GET_NFT_ATTESTATIONS, {
     skip: true,
@@ -105,11 +104,11 @@ export default function CheckTab() {
             (field: { name: string }) => field.name === "message"
           ).value.value;
           const provider = new ethers.JsonRpcProvider(
-            "https://mainnet.base.org"
+            process.env.NEXT_PUBLIC_BASE_RPC_URL
           );
           const openseaSDK = new OpenSeaSDK(provider, {
             chain: Chain.Base,
-            apiKey: "913dbf5f6097430fa790e0aec86702d6",
+            apiKey: process.env.NEXT_PUBLIC_OPEN_SEA_API_KEY,
           });
           const asset = await openseaSDK.api.getNFT(
             nftAddress,

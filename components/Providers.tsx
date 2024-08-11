@@ -16,7 +16,7 @@ const queryClient = new QueryClient();
 
 const config = getDefaultConfig({
   appName: "StarSeal NFT Signing",
-  projectId: "47558068d4576cdd4b14d43b4a6c4b2f",
+  projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID!,
   chains: [mainnet, sepolia, base],
   transports: {
     [mainnet.id]: http(),
