@@ -1,36 +1,63 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# StarSeal
 
-## Getting Started
+StarSeal is a Web3 application that enables digital autographs for NFTs using Ethereum Attestation Service (EAS) on the Base Mainnet. It bridges the gap between traditional autographs and the digital collectibles space.
 
-First, run the development server:
+## Project Description
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+StarSeal allows celebrities to digitally autograph fans' NFTs, creating a new form of fan-celebrity interaction in the digital world. It's also a platform for friends to leave their mark on each other's digital collectibles.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Key features:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- Digital autographing of NFTs
+- Verification of autographs
+- Integration with OpenSea for NFT display
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## How It Works
+
+1. **Autographing**: Users input an NFT's address and token ID, along with a personal message.
+2. **Verification**: The app creates a blockchain record (attestation) using EAS.
+3. **Checking**: Fans can verify autographs by entering NFT details and the signer's wallet address.
+
+## Technologies Used
+
+- Frontend: Next.js, Framer Motion, React Hot Toast
+- Blockchain Interaction: ethers.js, wagmi, viem
+- Wallet Connection: RainbowKit
+- Data Querying: Apollo Client, GraphQL
+- NFT Integration: OpenSea SDK
+- Core Technology: Ethereum Attestation Service (EAS) SDK
+
+## Installation
+
+1. Clone the repository:
+   ```
+   git clone https://github.com/brepositorium/star-seal
+   ```
+2. Navigate to the project directory:
+   ```
+   cd star-seal
+   ```
+3. Install dependencies:
+   ```
+   yarn install
+   ```
+
+## Usage
+
+1. Start the development server:
+   ```
+   yarn dev
+   ```
+2. Open your browser and navigate to `http://localhost:3000`
 
 ## Learn More
 
-To learn more about Next.js, take a look at the following resources:
+For a detailed explanation of how StarSeal was built and how to use EAS, check out our [tutorial blog post](https://mirror.xyz/0xF00CE1f047b5347C03A28DaD1a084396a2EA71fa/_9k_anA5giY3yVjMUzzuN7bOzX8lov-f6cq179zrVpk).
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Contributing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+Contributions are welcome! Please feel free to submit a Pull Request.
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is licensed under the MIT License.
